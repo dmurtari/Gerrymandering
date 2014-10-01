@@ -10,7 +10,10 @@ class Gerrymandering:
         for line in self.neighborhood_file:
             self.neighborhood.append(line.strip().split(" "))
 
-        print("Neighborhood is: ", self.neighborhood)
+        self.district_size = len(self.neighborhood[1])
+
+        print "Neighborhood is: " + str(self.neighborhood)
+        print "District size is: " + str(self.district_size)
              
 def main():
     gerrymandering = Gerrymandering()
