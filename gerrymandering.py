@@ -8,7 +8,7 @@ class Gerrymandering:
         self.neighborhood_file = open(neighborhood_file, "r")
         self.neighborhood = []
         for line in self.neighborhood_file:
-            self.neighborhood.append(line.strip())
+            self.neighborhood.append(line.strip().split(" "))
 
         print("Neighborhood is: ", self.neighborhood)
              
