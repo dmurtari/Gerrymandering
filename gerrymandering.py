@@ -1,3 +1,5 @@
+from graph import Graph
+
 class Gerrymandering:
     
     def __init__(self, neighborhood_file = "./smallNeighborhood.txt"):
