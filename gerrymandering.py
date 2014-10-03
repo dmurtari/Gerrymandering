@@ -13,6 +13,7 @@ class Gerrymandering:
             self.neighborhood.append(line.strip().split(" "))
 
         self.district_size = len(self.neighborhood[1])
+        self.district = Graph()
 
         print "Neighborhood is: " + str(self.neighborhood)
         print "District size is: " + str(self.district_size)

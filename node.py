@@ -11,23 +11,22 @@ class Node:
         self.name = name
         self.neighbors = {}
         self.visited = False
-        self.sccID = None
         self.pre = None
         self.post = None
         self.dist = 0
 
     # Accessor for the name
-    def getName(self):
+    def get_name(self):
         return self.name
 
     # Accessor for the names of the neighbors to the current node
-    def getNeighbors(self):
+    def get_neighbors(self):
         return self.neighbors.keys()
 
     # Accessor for the weights of the neighbors to the current node
-    def getWeight(self, neighbor):
+    def get_weight(self, neighbor):
         return self.neighbors[neighbor]
 
     # Add a neighbor to the current node, with the default being no weight
-    def addNeighbor(self, neighbor, weight = 0):
+    def add_neighbor(self, neighbor, weight = 0):
         self.neighbors[neighbor] = weight
