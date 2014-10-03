@@ -22,23 +22,27 @@ class Graph:
         for line in neighborhood_file:
             neighborhood.append(line.strip().split(" "))
 
-        for i, neighbors in enumerate(neighborhood):
-            for j, house in enumerate(neighbors):
+        for j, neighbors in enumerate(neighborhood):
+            for i, house in enumerate(neighbors):
                 print i, j, house
-                if j != (len(neighbors) - 1):
-                    self.add_edge(house, neighbors[j + 1], 0) 
-                    edgecount += 1
-                if j != 0:
-                    self.add_edge(house, neighbors[j - 1], 0) 
-                    edgecount += 1
                 if i != (len(neighbors) - 1):
-                    self.add_edge(house, neighborhood[i + 1][j], 0)
+                    print "Adding edge from", (house, i, j), "to", (neighbors[i + 1], i + 1, j)
+                    self.add_edge((house, i, j), (neighbors[i + 1], i + 1, j), 0) 
                     edgecount += 1
                 if i != 0:
-                    self.add_edge(house, neighborhood[i - 1][j], 0) 
+                    print "Adding edge from", (house, i, j), "to", (neighbors[i - 1], i - 1, j)
+                    self.add_edge((house, i, j), (neighbors[i - 1], i - 1, j), 0) 
+                    edgecount += 1
+                if j != (len(neighbors) - 1):
+                    print "Adding edge from", (house, i, j), "to", (neighborhood[j + 1][i], i, j + 1)
+                    self.add_edge((house, i, j), (neighborhood[j + 1][i], i, j + 1), 0)
+                    edgecount += 1
+                if j != 0:
+                    print "Adding edge from", (house, i, j), "to", (neighborhood[j - 1][i], i, j - 1)
+                    self.add_edge((house, i, j), (neighborhood[j - 1][i], i, j - 1), 0) 
                     edgecount += 1
 
-        print "Added ", edgecount, " edges"
+        print "Added", edgecount, "edges"
 
     # Add a node of a given name, and increment the amount of nodes
     def add_node(self, name):

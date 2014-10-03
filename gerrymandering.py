@@ -8,8 +8,6 @@ class Gerrymandering:
         in appropriate data structure
         """
         self.neighborhood = Graph(neighborhood_file)
-
-        print "Neighborhood is: " + str(self.neighborhood)
              
 def main():
     gerrymandering = Gerrymandering()
