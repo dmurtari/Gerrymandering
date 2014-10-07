@@ -7,20 +7,31 @@ class Gerrymandering:
     def __init__(self, neighborhood_file = "./smallNeighborhood.txt"):
         """
         Initialize by reading in the data from a given file, and store the data
-        in appropriate data structure
+        in a 2D array. Also create a corrosponding array to hold region 
+        information, where MAX is represented by an even number, MIN is 
+        represented by an odd number, and if a region has not been selected by
+        either it is represented by 0
         """
+
+        # Store neighborhood information in a 2D array
         neighborhood_file = open(neighborhood_file, "r")
         self.neighborhood = []
-
         for line in neighborhood_file:
             self.neighborhood.append(line.strip().split(" "))
 
+        # Region size is equal to the length of one of the sides of the 
+        # neighborhood, since neighboorhoods are square
         self.region_size = len(self.neighborhood)
 
+        # Represent the regions selected by MAX and MIN. Initially filled with
+        # all 0's since neither has picked a region yet
         self.selected_regions = [[0]*self.region_size for i in range(self.region_size)]
-        vertical = []
-        horizontal = []
-        square = []
+       
+        # Generate the shapes that regions can be defined as, where n is the 
+        # length of the sides of the neighborhood.
+        vertical = []   # Vertical line of length n 
+        horizontal = [] # Horizontal line of length n
+        square = []     # Square of dimensions n/2 x n/2
 
         for i in range(self.region_size):
             vertical.append([0, i])
@@ -34,6 +45,14 @@ class Gerrymandering:
         self.generate_moves()
 
     def generate_moves(self):
+        """
+        Generate a tree of available moves. Iterate through the array of 
+        available regions, generating a tree where each node represents a 
+        possible configuration of regions. Root node is the state where nothing
+        has been selected, root's children are where one move has been made, 
+        children's children are where two moves have been made, etc.
+        """
+
         root_move = Node(self.selected_regions)
         queue = Queue()
         queue.put(root_move)
@@ -52,6 +71,14 @@ class Gerrymandering:
                                 selected_parent.add_child(child_node)
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
+        """
+        See if a given shape will fit in the available space, where the shape 
+        will start at a given set of starting coordinates. If the shape fits, 
+        then designate the region that that shape covers as being a district 
+        that the current player owns (even for MAX, odd for MIN), and return 
+        the updated configuration to the caller
+        """
+
         selected_region=deepcopy(selected_regions)
         x, y = starting_coords
         for i in range(len(shape)):
