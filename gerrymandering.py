@@ -39,19 +39,15 @@ class Gerrymandering:
         queue.put(root_move)
         while not queue.empty():
             selected_parent = queue.get()
-            print "Got", selected_parent.get_value()
             for i in range(self.region_size):
                 for j in range(self.region_size):
-                    for shape in self.shapes:
-                        print "Shape", shape
-                        print "before selected_parent", selected_parent.get_value()
-                        selected_child = self.fit_shape(shape, selected_parent.get_value(), (i, j), 2)
-                        print "after selected_parent", selected_parent.get_value()
-                        if selected_child:
-                            child_node = Node(selected_child)
-                            print "Adding", child_node.get_value()
-                            queue.put(child_node)
-                            selected_parent.add_child(child_node)
+                    if selected_parent.get_value()[i][j] == 0:
+                        for shape in self.shapes:
+                            selected_child = self.fit_shape(shape, selected_parent.get_value(), (i, j), 2)
+                            if selected_child:
+                                child_node = Node(selected_child)
+                                queue.put(child_node)
+                                selected_parent.add_child(child_node)
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
         selected_region=deepcopy(selected_regions)
