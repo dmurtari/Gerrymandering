@@ -25,6 +25,9 @@ class Graph:
         for j, neighbors in enumerate(neighborhood):
             for i, house in enumerate(neighbors):
                 print i, j, house
+                self.add_node((house, i, j))
+                print "Added node", (house, i, j)
+                """
                 if i != (len(neighbors) - 1):
                     print "Adding edge from", (house, i, j), "to", (neighbors[i + 1], i + 1, j)
                     self.add_edge((house, i, j), (neighbors[i + 1], i + 1, j), 0) 
@@ -41,8 +44,7 @@ class Graph:
                     print "Adding edge from", (house, i, j), "to", (neighborhood[j - 1][i], i, j - 1)
                     self.add_edge((house, i, j), (neighborhood[j - 1][i], i, j - 1), 0) 
                     edgecount += 1
-
-        print "Added", edgecount, "edges"
+                """
 
     # Add a node of a given name, and increment the amount of nodes
     def add_node(self, name):
