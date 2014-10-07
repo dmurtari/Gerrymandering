@@ -17,7 +17,7 @@ class Gerrymandering:
 
         self.region_size = len(self.neighborhood)
 
-        self.selected_regions = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        self.selected_regions = [[0]*self.region_size for i in range(self.region_size)]
         vertical = []
         horizontal = []
         square = []
@@ -37,7 +37,9 @@ class Gerrymandering:
         root_move = Node(self.selected_regions)
         queue = Queue()
         queue.put(root_move)
+
         while not queue.empty():
+            print queue.qsize()
             selected_parent = queue.get()
             for i in range(self.region_size):
                 for j in range(self.region_size):
