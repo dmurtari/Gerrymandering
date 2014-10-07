@@ -4,16 +4,16 @@ from node import Node
 class Graph:
 
     # Initialize a graph with an empty list of nodes
-    def __init__(self, graph_file):
+    def __init__(self):
         self.node_list = {}
-        self.import_from_file(graph_file)
+        # self.import_from_file(graph_file)
 
     # Allow iterations over nodes
     def __iter__(self):
         return iter(self.node_list.values())
-    
+
     # Initialize a graph from a file representing a 2D matrix with nodes
-    # separeted by spaces. 
+    # separeted by spaces.
     def import_from_file(self, graph_file, reverse = False):
         neighborhood_file = open(graph_file, "r")
         neighborhood = []
@@ -30,11 +30,11 @@ class Graph:
                 """
                 if i != (len(neighbors) - 1):
                     print "Adding edge from", (house, i, j), "to", (neighbors[i + 1], i + 1, j)
-                    self.add_edge((house, i, j), (neighbors[i + 1], i + 1, j), 0) 
+                    self.add_edge((house, i, j), (neighbors[i + 1], i + 1, j), 0)
                     edgecount += 1
                 if i != 0:
                     print "Adding edge from", (house, i, j), "to", (neighbors[i - 1], i - 1, j)
-                    self.add_edge((house, i, j), (neighbors[i - 1], i - 1, j), 0) 
+                    self.add_edge((house, i, j), (neighbors[i - 1], i - 1, j), 0)
                     edgecount += 1
                 if j != (len(neighbors) - 1):
                     print "Adding edge from", (house, i, j), "to", (neighborhood[j + 1][i], i, j + 1)
@@ -42,7 +42,7 @@ class Graph:
                     edgecount += 1
                 if j != 0:
                     print "Adding edge from", (house, i, j), "to", (neighborhood[j - 1][i], i, j - 1)
-                    self.add_edge((house, i, j), (neighborhood[j - 1][i], i, j - 1), 0) 
+                    self.add_edge((house, i, j), (neighborhood[j - 1][i], i, j - 1), 0)
                     edgecount += 1
                 """
 
@@ -50,7 +50,7 @@ class Graph:
     def add_node(self, name):
         self.node_list[name] = Node(name)
 
-    # Add an edge from source to dest, creating source and dest if they do not 
+    # Add an edge from source to dest, creating source and dest if they do not
     # exist
     def add_edge(self, source, dest, weight = 0):
         if source not in self.node_list:
