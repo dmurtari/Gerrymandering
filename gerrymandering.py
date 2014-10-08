@@ -78,6 +78,8 @@ class Gerrymandering:
                                 queue.put(child_node)
                                 selected_parent.add_child(child_node)
 
+        self.minimax(root_move, 100, self.max_player)
+
     def fit_shape(self, shape, selected_regions, starting_coords, player):
         """
         See if a given shape will fit in the available space, where the shape 
@@ -128,6 +130,23 @@ class Gerrymandering:
 
         return districts_won
 
+    def minimax(self, node, depth, player):
+
+        if depth == 0 or len(node.get_children()) == 0:
+            print "value of node", node.get_value(), "is", self.evaluate_board(node.get_value())
+            return self.evaluate_board(node.get_value())
+        elif player == self.max_player:
+            best_value = -float("inf")
+            for child in node.get_children():
+                value = self.minimax(child, depth - 1, self.min_player)
+                best_value = max(best_value, value)
+            return best_value
+        else:
+            best_value = float("inf")
+            for child in node.get_children():
+                value = self.minimax(child, depth - 1, self.max_player)
+                best_value = max(best_value, value)
+            return best_value
 
 def main():
     gerrymandering = Gerrymandering("./smallNeighborhood.txt")
