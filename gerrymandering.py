@@ -97,6 +97,32 @@ class Gerrymandering:
             selected_region[dx][dy] = player
         return selected_region
 
+    def evaluate(self, region):
+        """
+        Evaluates a given region according to the current player. Uses
+        the function suggested on the worksheet, giving greater weight to 
+        configurations that group the opposing player and give the current 
+        player a majority
+        """
+
+        # Sum of even (MAX) and off (MIN) elements. Don't currently do anything
+        # with the sum of even elements, but calculate anyways
+        even_sum = 0
+        odd_sum = 0 
+
+        for element in region:
+            if element == 0:
+                return -1
+            elif element % 2 == 0:
+                even_sum += 1
+            else:
+                odd_sum += 1
+
+        # Score is good if MINs are grouped together, not as good if a lot of
+        # MAXs are grouped together
+        return odd_sum + 1
+
+
 def main():
     gerrymandering = Gerrymandering("./smallNeighborhood.txt")
 
