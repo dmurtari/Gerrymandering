@@ -1,10 +1,11 @@
+from sys import argv
 from tree import Node
 from Queue import Queue
 from copy import deepcopy, copy
 
 class Gerrymandering:
 
-    def __init__(self, neighborhood_file = "./smallNeighborhood.txt"):
+    def __init__(self, neighborhood_file = "smallNeighborhood.txt"):
         """
         Initialize by reading in the data from a given file, and store the data
         in a 2D array. Also create a corrosponding array to hold region 
@@ -45,6 +46,7 @@ class Gerrymandering:
         self.shapes = [vertical, horizontal, square]
         self.max_player = "D"
         self.min_player = "R"
+
         self.generate_moves()
 
     def generate_moves(self):
@@ -78,7 +80,7 @@ class Gerrymandering:
                                 selected_parent.add_child(child_node)
 
         value, board = self.minimax(root_move, 100, self.max_player)
-        print "Best board is", board, "with value", value
+        self.generate_output(board)
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
         """
@@ -100,10 +102,9 @@ class Gerrymandering:
                 return None
             selected_region[dx][dy] = player
 
-        self.evaluate_board(selected_region)
         return selected_region
 
-    def evaluate_board(self, game_state):
+    def evaluate_board(self, game_state, should_print = False):
         """
         Evaluates the board state for the max_player, and returns the number
         of districts that the max_player has won
@@ -125,8 +126,23 @@ class Gerrymandering:
                     region_dict[game_state[i][j]] += 1
 
         for player, count in region_dict.iteritems():
-            if count > 2:
+            if count > self.region_size/2:
                 districts_won += 1
+                if should_print:
+                    print "District", str(player) + ":", self.max_player
+            elif count == self.region_size/2 and should_print:
+                print "District", str(player) + ": Tied"
+            elif count < self.region_size/2 and should_print:
+                print "District", str(player) + ":", self.min_player
+
+        if should_print:
+            if districts_won > self.region_size/2:
+                print "Election outcome:", self.max_player, "wins"
+            elif districts_won == self.region_size/2:
+                print "Election outcome: Tie"
+            else:
+                print "Election outcome:", self.min_player, "wins"     
+
 
         return districts_won
 
@@ -155,8 +171,37 @@ class Gerrymandering:
                     best_board = board
             return (best_value, board)
 
+    def generate_output(self, board):
+        """
+        Outputs required information for grading for a given board.
+        """
+        districts = {}
+
+        print "MAX =", self.max_player
+        print "MIN =", self.min_player
+        print ""
+
+        print "Board is:"
+        for row in board:
+            print row
+            for elt in row:
+                districts[elt] = []
+        print ""
+
+        for i, row in enumerate(board):
+            for j, elt in enumerate(row):
+                districts[elt] += [(i, j)]
+
+        districts = iter(sorted(districts.items()))
+
+        for owner, coords in districts:
+            print "District", str(owner) + ":", coords
+        print ""
+
+        self.evaluate_board(board, should_print=True)
+
 def main():
-    gerrymandering = Gerrymandering("./smallNeighborhood.txt")
+    gerrymandering = Gerrymandering(argv[1])
 
 if __name__ == "__main__":
     main()
