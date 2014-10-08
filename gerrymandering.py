@@ -46,11 +46,6 @@ class Gerrymandering:
         self.shapes = [vertical, horizontal, square]
         self.max_player = "D"
         self.min_player = "R"
-<<<<<<< HEAD
-=======
-
-        self.generate_moves()
->>>>>>> 4740e25d9adf2d76dc201dcd180a66c5c7ba3647
 
     def generate_moves(self):
         """
@@ -82,7 +77,7 @@ class Gerrymandering:
                                 queue.put(child_node)
                                 selected_parent.add_child(child_node)
 
-        value, board = self.minimax(root_move, 100, self.max_player)
+        value, board = self.minimax(root_move, 100, self.min_player)
         self.generate_output(board)
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
@@ -94,7 +89,7 @@ class Gerrymandering:
         the updated configuration to the caller
         """
 
-        selected_region=deepcopy(selected_regions)
+        selected_region = deepcopy(selected_regions)
         x, y = starting_coords
         for i in range(len(shape)):
             dx = x + shape[i][0]
@@ -124,7 +119,7 @@ class Gerrymandering:
 
         for i, row in enumerate(self.neighborhood):
             for j, elt in enumerate(row):
-                if elt == self.max_player and game_state[i][j] % 2 == 0 and \
+                if elt == self.min_player and game_state[i][j] % 2 == 0 and \
                     not game_state[i][j] == 0:
                     region_dict[game_state[i][j]] += 1
 
@@ -132,19 +127,19 @@ class Gerrymandering:
             if count > self.region_size/2:
                 districts_won += 1
                 if should_print:
-                    print "District", str(player) + ":", self.max_player
+                    print "District", str(player) + ":", self.min_player
             elif count == self.region_size/2 and should_print:
                 print "District", str(player) + ": Tied"
             elif count < self.region_size/2 and should_print:
-                print "District", str(player) + ":", self.min_player
+                print "District", str(player) + ":", self.max_player
 
         if should_print:
             if districts_won > self.region_size/2:
-                print "Election outcome:", self.max_player, "wins"
+                print "Election outcome:", self.min_player, "wins"
             elif districts_won == self.region_size/2:
                 print "Election outcome: Tie"
             else:
-                print "Election outcome:", self.min_player, "wins"     
+                print "Election outcome:", self.max_player, "wins"     
 
 
         return districts_won
@@ -157,10 +152,10 @@ class Gerrymandering:
 
         if depth == 0 or len(node.get_children()) == 0:
             return (self.evaluate_board(node.get_value()), node.get_value())
-        elif player == self.max_player:
+        elif player == self.min_player:
             best_value = -float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, depth - 1, self.min_player)
+                value, board = self.minimax(child, depth - 1, self.max_player)
                 if value > best_value:
                     best_value = value
                     best_board = board
@@ -168,7 +163,7 @@ class Gerrymandering:
         else:
             best_value = float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, depth - 1, self.max_player)
+                value, board = self.minimax(child, depth - 1, self.min_player)
                 if value < best_value:
                     best_value = value
                     best_board = board
