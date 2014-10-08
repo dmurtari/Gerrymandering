@@ -46,6 +46,11 @@ class Gerrymandering:
         self.shapes = [vertical, horizontal, square]
         self.max_player = "D"
         self.min_player = "R"
+<<<<<<< HEAD
+=======
+
+        self.generate_moves()
+>>>>>>> 4740e25d9adf2d76dc201dcd180a66c5c7ba3647
 
     def generate_moves(self):
         """
