@@ -116,15 +116,19 @@ class Gerrymandering:
             for elt in row:
                 region_dict[elt] = 0
 
+        print "game_state", game_state
         for i, row in enumerate(self.neighborhood):
             for j, elt in enumerate(row):
-                if elt == self.max_player and not elt == 0:
+                if elt == self.max_player and game_state[i][j] % 2 == 0 and \
+                    not game_state[i][j] == 0:
                     region_dict[game_state[i][j]] += 1
 
-        for player, count in region_dict:
+        print "region_dict", region_dict
+        for player, count in region_dict.iteritems():
             if count > 2:
                 districts_won += 1
 
+        print "districts_won", districts_won
         return districts_won
 
 
