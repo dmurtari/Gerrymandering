@@ -43,6 +43,8 @@ class Gerrymandering:
                 square.append([i, j])
 
         self.shapes = [vertical, horizontal, square]
+        self.max_player = "D"
+        self.min_player = "R"
         self.generate_moves()
 
     def generate_moves(self):
@@ -95,32 +97,35 @@ class Gerrymandering:
                 not selected_region[dx][dy] == 0:
                 return None
             selected_region[dx][dy] = player
+
+        self.evaluate_board(selected_region)
         return selected_region
 
-    def evaluate(self, region):
+    def evaluate_board(self, game_state):
         """
-        Evaluates a given region according to the current player. Uses
-        the function suggested on the worksheet, giving greater weight to 
-        configurations that group the opposing player and give the current 
-        player a majority
+        Evaluates the board state for the max_player, and returns the number
+        of districts that the max_player has won
         """
+        districts_won = 0
 
-        # Sum of even (MAX) and off (MIN) elements. Don't currently do anything
-        # with the sum of even elements, but calculate anyways
-        even_sum = 0
-        odd_sum = 0 
+        # Region dict holds the number of max_player's elements present in each
+        # district. E.g. if a district is designated by a 1, and there are 3
+        # D's in 1 (where D is the max_player), then region_dict = {1: 3}
+        region_dict = {}
+        for row in game_state:
+            for elt in row:
+                region_dict[elt] = 0
 
-        for element in region:
-            if element == 0:
-                return -1
-            elif element % 2 == 0:
-                even_sum += 1
-            else:
-                odd_sum += 1
+        for i, row in enumerate(self.neighborhood):
+            for j, elt in enumerate(row):
+                if elt == self.max_player and not elt == 0:
+                    region_dict[game_state[i][j]] += 1
 
-        # Score is good if MINs are grouped together, not as good if a lot of
-        # MAXs are grouped together
-        return odd_sum + 1
+        for player, count in region_dict:
+            if count > 2:
+                districts_won += 1
+
+        return districts_won
 
 
 def main():
