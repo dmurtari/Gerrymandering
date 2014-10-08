@@ -142,14 +142,18 @@ class Gerrymandering:
             best_value = -float("inf")
             for child in node.get_children():
                 value, board = self.minimax(child, depth - 1, self.min_player)
-                best_value = max(best_value, value)
-            return (best_value, node.get_value())
+                if value > best_value:
+                    best_value = value
+                    best_board = board
+            return (best_value, best_board)
         else:
             best_value = float("inf")
             for child in node.get_children():
                 value, board = self.minimax(child, depth - 1, self.max_player)
-                best_value = min(best_value, value)
-            return (best_value, node.get_value())
+                if value < best_value:
+                    best_value = value
+                    best_board = board
+            return (best_value, board)
 
 def main():
     gerrymandering = Gerrymandering("./smallNeighborhood.txt")
