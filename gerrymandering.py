@@ -62,7 +62,6 @@ class Gerrymandering:
         queue.put(root_move)
 
         while not queue.empty():
-            print queue.qsize()
             selected_parent = queue.get()
             current_player = selected_parent.get_player()
             for i in range(self.region_size):
@@ -78,7 +77,8 @@ class Gerrymandering:
                                 queue.put(child_node)
                                 selected_parent.add_child(child_node)
 
-        self.minimax(root_move, 100, self.max_player)
+        value, board = self.minimax(root_move, 100, self.max_player)
+        print "Best board is", board, "with value", value
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
         """
@@ -131,22 +131,25 @@ class Gerrymandering:
         return districts_won
 
     def minimax(self, node, depth, player):
+        """
+        Perform a minimax search from a given node, to a given depth, from the
+        perspective of a given player. 
+        """
 
         if depth == 0 or len(node.get_children()) == 0:
-            print "value of node", node.get_value(), "is", self.evaluate_board(node.get_value())
-            return self.evaluate_board(node.get_value())
+            return (self.evaluate_board(node.get_value()), node.get_value())
         elif player == self.max_player:
             best_value = -float("inf")
             for child in node.get_children():
-                value = self.minimax(child, depth - 1, self.min_player)
+                value, board = self.minimax(child, depth - 1, self.min_player)
                 best_value = max(best_value, value)
-            return best_value
+            return (best_value, node.get_value())
         else:
             best_value = float("inf")
             for child in node.get_children():
-                value = self.minimax(child, depth - 1, self.max_player)
-                best_value = max(best_value, value)
-            return best_value
+                value, board = self.minimax(child, depth - 1, self.max_player)
+                best_value = min(best_value, value)
+            return (best_value, node.get_value())
 
 def main():
     gerrymandering = Gerrymandering("./smallNeighborhood.txt")
