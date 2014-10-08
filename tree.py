@@ -1,10 +1,11 @@
 class Node:
 
-	def __init__(self, value):
+	def __init__(self, value, player):
 		self.neighbors = []
 		self.parent = None
 		self.value = value
 		self.children = []
+		self.player = player
 
 	def add_child(self, child):
 		child.parent = self
@@ -18,3 +19,6 @@ class Node:
 
 	def get_children(self):
 		return self.children
+
+	def get_player(self):
+		return self.player

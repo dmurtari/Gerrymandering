@@ -25,7 +25,8 @@ class Gerrymandering:
 
         # Represent the regions selected by MAX and MIN. Initially filled with
         # all 0's since neither has picked a region yet
-        self.selected_regions = [[0]*self.region_size for i in range(self.region_size)]
+        self.selected_regions = [[0]*self.region_size \
+                                 for i in range(self.region_size)]
        
         # Generate the shapes that regions can be defined as, where n is the 
         # length of the sides of the neighborhood.
@@ -53,20 +54,25 @@ class Gerrymandering:
         children's children are where two moves have been made, etc.
         """
 
-        root_move = Node(self.selected_regions)
+        current_player = 0
+        root_move = Node(self.selected_regions, current_player)
         queue = Queue()
         queue.put(root_move)
 
         while not queue.empty():
             print queue.qsize()
             selected_parent = queue.get()
+            current_player = selected_parent.get_player()
             for i in range(self.region_size):
                 for j in range(self.region_size):
                     if selected_parent.get_value()[i][j] == 0:
                         for shape in self.shapes:
-                            selected_child = self.fit_shape(shape, selected_parent.get_value(), (i, j), 2)
+                            selected_child = self.fit_shape(shape, \
+                                selected_parent.get_value(), (i, j), \
+                                current_player + 1)
                             if selected_child:
-                                child_node = Node(selected_child)
+                                child_node = Node(selected_child, \
+                                                  current_player + 1)
                                 queue.put(child_node)
                                 selected_parent.add_child(child_node)
 
@@ -85,7 +91,8 @@ class Gerrymandering:
             dx = x + shape[i][0]
             dy = y + shape[i][1]
 
-            if dx >= self.region_size or dy >= self.region_size or not selected_region[dx][dy] == 0:
+            if dx >= self.region_size or dy >= self.region_size or \
+                not selected_region[dx][dy] == 0:
                 return None
             selected_region[dx][dy] = player
         return selected_region
