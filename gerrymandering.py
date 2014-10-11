@@ -10,8 +10,8 @@ class Gerrymandering:
     def __init__(self, neighborhood_file = "smallNeighborhood.txt"):
         """
         Initialize by reading in the data from a given file, and store the data
-        in a 2D array. Also create a corrosponding array to hold region 
-        information, where MAX is represented by an even number, MIN is 
+        in a 2D array. Also create a corrosponding array to hold region
+        information, where MAX is represented by an even number, MIN is
         represented by an odd number, and if a region has not been selected by
         either it is represented by 0
         """
@@ -22,7 +22,7 @@ class Gerrymandering:
         for line in neighborhood_file:
             self.neighborhood.append(line.strip().split(" "))
 
-        # Region size is equal to the length of one of the sides of the 
+        # Region size is equal to the length of one of the sides of the
         # neighborhood, since neighboorhoods are square
         self.region_size = len(self.neighborhood)
 
@@ -30,10 +30,10 @@ class Gerrymandering:
         # all 0's since neither has picked a region yet
         self.selected_regions = [[0]*self.region_size \
                                  for i in range(self.region_size)]
-       
-        # Generate the shapes that regions can be defined as, where n is the 
+
+        # Generate the shapes that regions can be defined as, where n is the
         # length of the sides of the neighborhood.
-        vertical = []   # Vertical line of length n 
+        vertical = []   # Vertical line of length n
         horizontal = [] # Horizontal line of length n
         square = []     # Square of dimensions n/2 x n/2
 
@@ -52,24 +52,25 @@ class Gerrymandering:
 
     def generate_moves(self, depth, selected_regions):
         """
-        Generate a tree of available moves. Iterate through the array of 
-        available regions, generating a tree where each node represents a 
+        Generate a tree of available moves. Iterate through the array of
+        available regions, generating a tree where each node represents a
         possible configuration of regions. Root node is the state where nothing
-        has been selected, root's children are where one move has been made, 
+        has been selected, root's children are where one move has been made,
         children's children are where two moves have been made, etc.
         """
 
         current_player = 0
         root_move = Node(selected_regions, current_player)
-        self.queue = Queue()
+        self.queue.queue.clear()
+        #print "GENERATEMOVES"
 
         self.queue.put(root_move)
         while not self.queue.empty():
             selected_parent = self.queue.get()
             current_player = selected_parent.get_player()
-            print "self.queuesize", self.queue.qsize()
+            #print "self.queuesize", self.queue.qsize()
             if current_player > depth:
-                print "broke"
+                #print "broke"
                 break
             for k, shape in enumerate(self.shapes):
                 if k == 0:
@@ -93,32 +94,36 @@ class Gerrymandering:
                                 selected_parent.add_child(child_node)
                                 """
         return root_move
-        
+
 
     def fit_horizontal(self, selected_regions, current_player, selected_parent):
-        for i in range(self.region_size):
-            if selected_regions[i][0] == 0:
-                current_child = self.select_child(self.shapes[0], selected_regions, \
-                    current_player, (i, 0))
-                if current_child:
-                    self.queue.put(current_child)
-                    selected_parent.add_child(current_child)
+        if not selected_parent.get_type_of_move() == "vertical":
+            for i in range(self.region_size):
+                if selected_regions[i][0] == 0:
+                    current_child = self.select_child(self.shapes[0], selected_regions, \
+                        current_player, (i, 0))
+                    if current_child:
+                        current_child.type_of_move = "horizontal"
+                        self.queue.put(current_child)
+                        selected_parent.add_child(current_child)
 
     def fit_vertical(self, selected_regions, current_player, selected_parent):
-        for i in range(self.region_size):
-            if selected_regions[0][i] == 0:
-                current_child = self.select_child(self.shapes[1], selected_regions, \
-                    current_player, (0, i))
-                if current_child:
-                    self.queue.put(current_child)
-                    selected_parent.add_child(current_child)
+        if not selected_parent.get_type_of_move() == "horizontal":
+            for i in range(self.region_size):
+                if selected_regions[0][i] == 0:
+                    current_child = self.select_child(self.shapes[1], selected_regions, \
+                        current_player, (0, i))
+                    if current_child:
+                        current_child.type_of_move = "vertical"
+                        self.queue.put(current_child)
+                        selected_parent.add_child(current_child)
 
     def fit_square(self, selected_regions, current_player, selected_parent):
         for i in range(self.region_size/2 + 1):
             for j in range(self.region_size/2 + 1):
-                if selected_regions[i][j] :
+                if selected_regions[i][j] == 0:
                     current_child = self.select_child(self.shapes[2], selected_regions, \
-                        current_player, (i, j))                    
+                        current_player, (i, j))
                     if current_child:
                         self.queue.put(current_child)
                         selected_parent.add_child(current_child)
@@ -136,15 +141,15 @@ class Gerrymandering:
 
     def fit_shape(self, shape, selected_regions, starting_coords, player):
         """
-        See if a given shape will fit in the available space, where the shape 
-        will start at a given set of starting coordinates. If the shape fits, 
-        then designate the region that that shape covers as being a district 
-        that the current player owns (even for MAX, odd for MIN), and return 
+        See if a given shape will fit in the available space, where the shape
+        will start at a given set of starting coordinates. If the shape fits,
+        then designate the region that that shape covers as being a district
+        that the current player owns (even for MAX, odd for MIN), and return
         the updated configuration to the caller
         """
         global fitting
         fitting = fitting + 1
-        print fitting
+        #print fitting
 
         selected_region = deepcopy(selected_regions)
         x, y = starting_coords
@@ -196,7 +201,7 @@ class Gerrymandering:
             elif districts_won == self.region_size/2:
                 print "Election outcome: Tie"
             else:
-                print "Election outcome:", self.max_player, "wins"     
+                print "Election outcome:", self.max_player, "wins"
 
 
         return districts_won
@@ -204,19 +209,24 @@ class Gerrymandering:
     def minimax(self, node, depth, player):
         """
         Perform a minimax search from a given node, to a given depth, from the
-        perspective of a given player. 
+        perspective of a given player.
         """
-        if depth == 0 or len(node.get_children()) == 0:
-            for row in node.get_value():
-                if 0 in row:
-                    print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-                    node = self.generate_moves(depth, node.get_value())
-                    print node.get_children()
-                    if len(node.get_children()) == 0:
-                        return (self.evaluate_board(node.get_value()), node.get_value())
-                    self.minimax(node, depth - 1, player)
+        if depth <= 0 or len(node.get_children()) == 0:
+            # complete = 1
+            # for row in node.get_value():
+            #     if 0 in row:
+            #         complete = 0
+            # if complete == 0:
+            #     print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            #     # print depth
+            #     print len(node.get_children())
+            #     node = self.generate_moves(-2, node.get_value())
+            #     # print node.get_children()
+            #     if len(node.get_children()) == 0:
+            #         return (self.evaluate_board(node.get_value()), node.get_value())
+            #     self.minimax(node, 1, player)
             return (self.evaluate_board(node.get_value()), node.get_value())
-                    
+
         elif player == self.min_player:
             best_value = -float("inf")
             for child in node.get_children():
@@ -265,8 +275,10 @@ class Gerrymandering:
 
 def main():
     gerrymandering = Gerrymandering(argv[1])
-    node = gerrymandering.generate_moves(2, gerrymandering.selected_regions)
-    value, board = gerrymandering.minimax(node, 2, "R")
+    node = gerrymandering.generate_moves(4, gerrymandering.selected_regions)
+    value, board = gerrymandering.minimax(node, 4, "R")
+
+    print board
     gerrymandering.generate_output(board)
 
 if __name__ == "__main__":
