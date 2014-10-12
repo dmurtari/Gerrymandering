@@ -146,14 +146,14 @@ class Gerrymandering:
 
     def evaluate_board(self, game_state, should_print = False):
         """
-        Evaluates the board state for the min_player, and returns the number
-        of districts that the min_player has won
+        Evaluates the board state for the max_player, and returns the number
+        of districts that the max_player has won
         """
         districts_won = 0
 
-        # Region dict holds the number of min_player's elements present in each
+        # Region dict holds the number of max_player's elements present in each
         # district. E.g. if a district is designated by a 1, and there are 3
-        # D's in 1 (where D is the max_player), then region_dict = {1: 3}
+        # D's in region 1 (where D is the max_player), then region_dict = {1: 3}
         region_dict = {}
         for row in game_state:
             for elt in row:
@@ -162,30 +162,30 @@ class Gerrymandering:
 
         for i, row in enumerate(self.neighborhood):
             for j, elt in enumerate(row):
-                if elt == self.min_player and not game_state[i][j] % 2 == 0 and \
+                if elt == self.max_player and game_state[i][j] % 2 == 0 and \
                     not game_state[i][j] == 0:
-                    if should_print:
-                        print game_state[i][j]
                     region_dict[game_state[i][j]] += 1
 
         for player, count in region_dict.iteritems():
             if count > self.region_size/2:
                 districts_won += 1
                 if should_print:
-                    print "District", str(player) + ":", self.min_player
+                    print "District", str(player) + ":", self.max_player
             elif count == self.region_size/2 and should_print:
                 print "District", str(player) + ": Tied"
             elif count < self.region_size/2 and should_print:
-                print "District", str(player) + ":", self.max_player
+                print "District", str(player) + ":", self.min_player
 
         if should_print:
-            if districts_won > self.region_size/2:
-                print "Election outcome:", self.min_player, "wins"
-            elif districts_won == self.region_size/2:
+            num_districts = 0
+            for player, count in region_dict.iteritems():
+                num_districts += 1
+            if districts_won > num_districts/2:
+                print "Election outcome:", self.max_player, "wins"
+            elif districts_won == num_districts/2:
                 print "Election outcome: Tie"
             else:
-                print "Election outcome:", self.max_player, "wins"
-
+                print "Election outcome:", self.min_player, "wins"
 
         return districts_won
 
@@ -200,10 +200,10 @@ class Gerrymandering:
         if depth <= 0 or len(node.get_children()) == 0:
             return (self.evaluate_board(node.get_value()), node.get_value())
 
-        elif player == self.min_player:
+        elif player == self.max_player:
             best_value = -float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, self.max_player, depth - 1)
+                value, board = self.minimax(child, self.min_player, depth - 1)
                 if value > best_value:
                     best_value = value
                     best_board = board
@@ -211,7 +211,7 @@ class Gerrymandering:
         else:
             best_value = float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, self.min_player, depth - 1)
+                value, board = self.minimax(child, self.max_player, depth - 1)
                 if value < best_value:
                     best_value = value
                     best_board = board
@@ -250,8 +250,6 @@ def main():
     gerrymandering = Gerrymandering(argv[1])
     node = gerrymandering.generate_moves( gerrymandering.selected_regions)
     value, board = gerrymandering.minimax(node, "D")
-
-    print board
     gerrymandering.generate_output(board)
 
 if __name__ == "__main__":
