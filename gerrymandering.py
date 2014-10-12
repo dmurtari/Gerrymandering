@@ -3,8 +3,6 @@ from tree import Node
 from Queue import Queue
 from copy import deepcopy, copy
 
-fitting = 0
-
 class Gerrymandering:
 
     def __init__(self, neighborhood_file = "smallNeighborhood.txt"):
@@ -49,8 +47,9 @@ class Gerrymandering:
         self.queue = Queue()
         self.max_player = "D"
         self.min_player = "R"
+        self.depth = self.region_size
 
-    def generate_moves(self, depth, selected_regions):
+    def generate_moves(self, selected_regions):
         """
         Generate a tree of available moves. Iterate through the array of
         available regions, generating a tree where each node represents a
@@ -62,68 +61,52 @@ class Gerrymandering:
         current_player = 0
         root_move = Node(selected_regions, current_player)
         self.queue.queue.clear()
-        #print "GENERATEMOVES"
 
         self.queue.put(root_move)
         while not self.queue.empty():
             selected_parent = self.queue.get()
             current_player = selected_parent.get_player()
-            #print "self.queuesize", self.queue.qsize()
-            if current_player > depth:
-                #print "broke"
+            if current_player > self.depth:
                 break
             for k, shape in enumerate(self.shapes):
                 if k == 0:
-                    self.fit_vertical(selected_parent.get_value(), current_player, selected_parent)
+                    self.fit_vertical(selected_parent.get_value(),\
+                                      current_player, selected_parent)
                 elif k == 1:
-                    self.fit_horizontal(selected_parent.get_value(), current_player, selected_parent)
+                    self.fit_horizontal(selected_parent.get_value(), \
+                                        current_player, selected_parent)
                 else:
-                    self.fit_square(selected_parent.get_value(), current_player, selected_parent)
-
-                """
-                for i in range(self.region_size):
-                    for j in range(self.region_size):
-                        if selected_parent.get_value()[i][j] == 0:
-                            selected_child = self.fit_shape(shape, \
-                                selected_parent.get_value(), (i, j), \
-                                current_player + 1)
-                            if selected_child:
-                                child_node = Node(selected_child, \
-                                                  current_player + 1)
-                                queue.put(child_node)
-                                selected_parent.add_child(child_node)
-                                """
+                    self.fit_square(selected_parent.get_value(), \
+                                    current_player, selected_parent)
         return root_move
 
 
     def fit_horizontal(self, selected_regions, current_player, selected_parent):
-        if not selected_parent.get_type_of_move() == "vertical":
-            for i in range(self.region_size):
-                if selected_regions[i][0] == 0:
-                    current_child = self.select_child(self.shapes[0], selected_regions, \
-                        current_player, (i, 0))
-                    if current_child:
-                        current_child.type_of_move = "horizontal"
-                        self.queue.put(current_child)
-                        selected_parent.add_child(current_child)
+        for i in range(self.region_size):
+            if selected_regions[i][0] == 0:
+                current_child = self.select_child(self.shapes[0], \
+                    selected_regions, current_player, (i, 0))
+                if current_child:
+                    current_child.type_of_move = "horizontal"
+                    self.queue.put(current_child)
+                    selected_parent.add_child(current_child)
 
     def fit_vertical(self, selected_regions, current_player, selected_parent):
-        if not selected_parent.get_type_of_move() == "horizontal":
-            for i in range(self.region_size):
-                if selected_regions[0][i] == 0:
-                    current_child = self.select_child(self.shapes[1], selected_regions, \
-                        current_player, (0, i))
-                    if current_child:
-                        current_child.type_of_move = "vertical"
-                        self.queue.put(current_child)
-                        selected_parent.add_child(current_child)
+        for i in range(self.region_size):
+            if selected_regions[0][i] == 0:
+                current_child = self.select_child(self.shapes[1], \
+                    selected_regions, current_player, (0, i))
+                if current_child:
+                    current_child.type_of_move = "vertical"
+                    self.queue.put(current_child)
+                    selected_parent.add_child(current_child)
 
     def fit_square(self, selected_regions, current_player, selected_parent):
         for i in range(self.region_size/2 + 1):
             for j in range(self.region_size/2 + 1):
                 if selected_regions[i][j] == 0:
-                    current_child = self.select_child(self.shapes[2], selected_regions, \
-                        current_player, (i, j))
+                    current_child = self.select_child(self.shapes[2], \
+                        selected_regions, current_player, (i, j))
                     if current_child:
                         self.queue.put(current_child)
                         selected_parent.add_child(current_child)
@@ -147,9 +130,6 @@ class Gerrymandering:
         that the current player owns (even for MAX, odd for MIN), and return
         the updated configuration to the caller
         """
-        global fitting
-        fitting = fitting + 1
-        #print fitting
 
         selected_region = deepcopy(selected_regions)
         x, y = starting_coords
@@ -166,23 +146,26 @@ class Gerrymandering:
 
     def evaluate_board(self, game_state, should_print = False):
         """
-        Evaluates the board state for the max_player, and returns the number
-        of districts that the max_player has won
+        Evaluates the board state for the min_player, and returns the number
+        of districts that the min_player has won
         """
         districts_won = 0
 
-        # Region dict holds the number of max_player's elements present in each
+        # Region dict holds the number of min_player's elements present in each
         # district. E.g. if a district is designated by a 1, and there are 3
         # D's in 1 (where D is the max_player), then region_dict = {1: 3}
         region_dict = {}
         for row in game_state:
             for elt in row:
-                region_dict[elt] = 0
+                if not elt == 0:
+                    region_dict[elt] = 0
 
         for i, row in enumerate(self.neighborhood):
             for j, elt in enumerate(row):
-                if elt == self.min_player and game_state[i][j] % 2 == 0 and \
+                if elt == self.min_player and not game_state[i][j] % 2 == 0 and \
                     not game_state[i][j] == 0:
+                    if should_print:
+                        print game_state[i][j]
                     region_dict[game_state[i][j]] += 1
 
         for player, count in region_dict.iteritems():
@@ -206,31 +189,21 @@ class Gerrymandering:
 
         return districts_won
 
-    def minimax(self, node, depth, player):
+    def minimax(self, node, player, depth=None):
         """
-        Perform a minimax search from a given node, to a given depth, from the
+        Perform a minimax search from a given node, to a given self.depth, from the
         perspective of a given player.
         """
+        if not depth:
+            depth = self.depth
+
         if depth <= 0 or len(node.get_children()) == 0:
-            # complete = 1
-            # for row in node.get_value():
-            #     if 0 in row:
-            #         complete = 0
-            # if complete == 0:
-            #     print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-            #     # print depth
-            #     print len(node.get_children())
-            #     node = self.generate_moves(-2, node.get_value())
-            #     # print node.get_children()
-            #     if len(node.get_children()) == 0:
-            #         return (self.evaluate_board(node.get_value()), node.get_value())
-            #     self.minimax(node, 1, player)
             return (self.evaluate_board(node.get_value()), node.get_value())
 
         elif player == self.min_player:
             best_value = -float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, depth - 1, self.max_player)
+                value, board = self.minimax(child, self.max_player, depth - 1)
                 if value > best_value:
                     best_value = value
                     best_board = board
@@ -238,7 +211,7 @@ class Gerrymandering:
         else:
             best_value = float("inf")
             for child in node.get_children():
-                value, board = self.minimax(child, depth - 1, self.min_player)
+                value, board = self.minimax(child, self.min_player, depth - 1)
                 if value < best_value:
                     best_value = value
                     best_board = board
@@ -263,7 +236,7 @@ class Gerrymandering:
 
         for i, row in enumerate(board):
             for j, elt in enumerate(row):
-                districts[elt] += [(i, j)]
+                districts[elt] += [(j, i)]
 
         districts = iter(sorted(districts.items()))
 
@@ -275,8 +248,8 @@ class Gerrymandering:
 
 def main():
     gerrymandering = Gerrymandering(argv[1])
-    node = gerrymandering.generate_moves(4, gerrymandering.selected_regions)
-    value, board = gerrymandering.minimax(node, 4, "R")
+    node = gerrymandering.generate_moves( gerrymandering.selected_regions)
+    value, board = gerrymandering.minimax(node, "D")
 
     print board
     gerrymandering.generate_output(board)
