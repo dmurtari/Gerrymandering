@@ -1,4 +1,10 @@
 class Node:
+	"""
+	Basic node data structure, that can have an arbitrary number of children.
+	Each node contains a value, a list of children, knows which player made 
+	the move that created the node, and knows the type of move that the node is
+	part of. Each node also keeps track of its parents
+	"""
 
 	def __init__(self, value, player):
 		self.neighbors = []

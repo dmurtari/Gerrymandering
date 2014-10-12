@@ -1,9 +1,29 @@
+# CSCI 3202 Assignment 2
+# ‎Irakli Zhuzhunashvili and Domenic Murtari
+# October 12, 2014
+
 from sys import argv
 from tree import Node
 from Queue import Queue
 from copy import deepcopy, copy
 
 class Gerrymandering:
+    """
+    Class that contains all of the functionality to parition a district so that
+    one part is more likely to win.
+
+    The neighborhood information (which areas are D and which areas are R) are
+    stored as a 2D array.
+
+    Algorithm:
+
+    1. Generate a tree of possible moves. Possible moves are represented by a
+       2D array of the same size as the neighborhood array. The root node is the
+       state where nobody has made a move, and children are each possible move 
+       by either player from the node.
+    2. Perform a minimax search on the tree of possible moves. The value of each
+       node is given as the number of districts that the max_player has won. 
+    """
 
     def __init__(self, neighborhood_file = "smallNeighborhood.txt"):
         """
@@ -82,6 +102,9 @@ class Gerrymandering:
 
 
     def fit_horizontal(self, selected_regions, current_player, selected_parent):
+        """
+        Fits a horizontal line into the given region
+        """
         for i in range(self.region_size):
             if selected_regions[i][0] == 0:
                 current_child = self.select_child(self.shapes[0], \
@@ -92,6 +115,9 @@ class Gerrymandering:
                     selected_parent.add_child(current_child)
 
     def fit_vertical(self, selected_regions, current_player, selected_parent):
+        """
+        Fits a vertical line into the given region
+        """
         for i in range(self.region_size):
             if selected_regions[0][i] == 0:
                 current_child = self.select_child(self.shapes[1], \
@@ -102,6 +128,9 @@ class Gerrymandering:
                     selected_parent.add_child(current_child)
 
     def fit_square(self, selected_regions, current_player, selected_parent):
+        """
+        Fits a square into the given region
+        """
         for i in range(self.region_size/2 + 1):
             for j in range(self.region_size/2 + 1):
                 if selected_regions[i][j] == 0:
@@ -112,10 +141,15 @@ class Gerrymandering:
                         selected_parent.add_child(current_child)
 
     def select_child(self, shape, selected_regions, current_player, coords):
+        """
+        Generates the child of a given parent by fitting a given shape into 
+        the parent's board. Return None if the given shape couldn't fit into 
+        the parent's board, and return a new node containing the new board
+        state if the shape fit.
+        """
         i, j = coords
-        selected_child = self.fit_shape(shape, \
-                                selected_regions, (i, j), \
-                                current_player + 1)
+        selected_child = self.fit_shape(shape, selected_regions, (i, j), \
+                                        current_player + 1)
         if selected_child:
             return Node(selected_child, current_player + 1)
         else:
