@@ -1,5 +1,5 @@
 # CSCI 3202 Assignment 2
-# ‎Irakli Zhuzhunashvili and Domenic Murtari
+# Irakli Zhuzhunashvili and Domenic Murtari
 # October 12, 2014
 
 from sys import argv
